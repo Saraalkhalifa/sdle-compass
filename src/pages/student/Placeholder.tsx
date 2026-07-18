@@ -41,4 +41,3 @@ export function AITutor()     { return <PlaceholderPage title="AI Tutor"      ph
 export function Resources()   { return <PlaceholderPage title="Resources"     phase={4}  />; }
 export function Performance() { return <PlaceholderPage title="Performance"   phase={9}  />; }
 export function Bookmarks()   { return <PlaceholderPage title="Bookmarks"     phase={3}  />; }
-export function Profile()     { return <PlaceholderPage title="My Profile"    phase={2}  />; }

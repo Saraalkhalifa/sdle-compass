@@ -1,22 +1,27 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { APP_CONFIG, ROUTES } from '@/config/app';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
 export function ForgotPassword() {
+  const { resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
-    try {
-      await new Promise((r) => setTimeout(r, 800));
+    const { error: err } = await resetPassword(email.trim());
+    setLoading(false);
+    if (err) {
+      setError(err);
+    } else {
       setSent(true);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -54,6 +59,11 @@ export function ForgotPassword() {
               <p className="text-sm text-slate-500 mb-6">
                 Enter your email address and we'll send you a link to reset your password.
               </p>
+              {error && (
+                <div role="alert" className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
+                  {error}
+                </div>
+              )}
               <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                 <Input
                   label="Email address"

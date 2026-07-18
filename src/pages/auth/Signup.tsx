@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { APP_CONFIG, ROUTES } from '@/config/app';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
 export function Signup() {
-  const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [confirmed, setConfirmed] = useState(false);
   const [form, setForm] = useState({ fullName: '', email: '', password: '', confirmPassword: '' });
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -17,26 +19,48 @@ export function Signup() {
     e.preventDefault();
     setError('');
 
-    if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-    if (form.password.length < 8) {
-      setError('Password must be at least 8 characters.');
-      return;
-    }
+    if (!form.fullName.trim()) { setError('Please enter your full name.'); return; }
+    if (form.password !== form.confirmPassword) { setError('Passwords do not match.'); return; }
+    if (form.password.length < 8) { setError('Password must be at least 8 characters.'); return; }
 
     setLoading(true);
-    try {
-      // Auth implementation comes in Phase 2
-      await new Promise((r) => setTimeout(r, 800));
-      navigate(ROUTES.studentDashboard);
-    } catch {
-      setError('Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
+    const { error: err, needsConfirmation } = await signUp(form.email.trim(), form.password, form.fullName.trim());
+    setLoading(false);
+    if (err) {
+      setError(err);
+    } else if (needsConfirmation) {
+      setConfirmed(true);
     }
+    // If no confirmation needed, AuthContext will set the session and PublicOnlyRoute redirects automatically
   };
+
+  if (confirmed) {
+    return (
+      <div className="min-h-dvh bg-slate-50 flex flex-col items-center justify-center px-4 py-12">
+        <div className="w-full max-w-sm">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
+            <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-slate-900 mb-2">Check your email</h2>
+            <p className="text-sm text-slate-500 leading-relaxed">
+              We sent a confirmation link to <strong>{form.email}</strong>.
+              Click it to activate your account.
+            </p>
+            <p className="text-xs text-slate-400 mt-4">
+              Didn't receive it? Check your spam folder or{' '}
+              <button onClick={() => setConfirmed(false)} className="text-blue-600 hover:underline">try again</button>.
+            </p>
+            <Link to={ROUTES.login} className="block mt-6 text-sm text-blue-600 hover:underline">
+              Back to sign in
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-slate-50 flex flex-col items-center justify-center px-4 py-12">

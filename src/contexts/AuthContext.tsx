@@ -151,7 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!supabase || !session?.user) return { error: 'Not authenticated.' };
     const { error } = await supabase
       .from('users')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update(updates)
       .eq('id', session.user.id);
     if (!error) await loadProfile(session.user.id);
     return { error: error?.message ?? null };

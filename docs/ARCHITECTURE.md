@@ -135,8 +135,8 @@ npm run lint         # ESLint
 | Phase | Status | Description |
 |---|---|---|
 | 0 | ✅ | Audit + architecture plan |
-| 1 | 🔄 | Foundation + design system |
-| 2 | — | Authentication + profiles + RBAC |
+| 1 | ✅ | Foundation + design system |
+| 2 | ✅ | Authentication + profiles + RBAC |
 | 3 | — | Curriculum + subject management |
 | 4 | — | Resource library |
 | 5 | — | Notes + flashcards |

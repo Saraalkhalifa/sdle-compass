@@ -1,31 +1,32 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { APP_CONFIG, ROUTES } from '@/config/app';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
 export function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const from = (location.state as { from?: Location })?.from?.pathname ?? ROUTES.studentDashboard;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    try {
-      // Auth implementation comes in Phase 2
-      // For now, navigate to dashboard to test layout
-      await new Promise((r) => setTimeout(r, 800));
-      navigate(ROUTES.studentDashboard);
-    } catch (err) {
-      setError('Invalid email or password. Please try again.');
-    } finally {
+    const { error: err } = await signIn(email.trim(), password);
+    if (err) {
+      setError(err);
       setLoading(false);
+    } else {
+      navigate(from, { replace: true });
     }
   };
 

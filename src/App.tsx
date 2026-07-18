@@ -3,15 +3,20 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { ROUTES } from '@/config/app';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ProtectedRoute, AdminRoute, PublicOnlyRoute } from '@/components/auth/ProtectedRoute';
 
 // Auth pages
 import { Login } from '@/pages/auth/Login';
 import { Signup } from '@/pages/auth/Signup';
 import { ForgotPassword } from '@/pages/auth/ForgotPassword';
+import { ResetPassword } from '@/pages/auth/ResetPassword';
+import { AuthCallback } from '@/pages/auth/AuthCallback';
 
 // Student pages
 import { StudentDashboard } from '@/pages/student/Dashboard';
 import { Subjects } from '@/pages/student/Subjects';
+import { ProfilePage } from '@/pages/student/Profile';
 import {
   StudyPlan,
   QuestionBank,
@@ -20,11 +25,11 @@ import {
   Resources,
   Performance,
   Bookmarks,
-  Profile,
 } from '@/pages/student/Placeholder';
 
 // Admin pages
 import { AdminDashboard } from '@/pages/admin/Dashboard';
+import { AdminUsers } from '@/pages/admin/Users';
 
 // 404
 import { NotFound } from '@/pages/NotFound';
@@ -59,34 +64,41 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            {/* Public routes */}
-            <Route path={ROUTES.home}          element={<Navigate to={ROUTES.login} replace />} />
-            <Route path={ROUTES.login}         element={<Login />} />
-            <Route path={ROUTES.signup}        element={<Signup />} />
-            <Route path={ROUTES.forgotPassword}element={<ForgotPassword />} />
+        <AuthProvider>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              {/* Public-only routes (redirect to dashboard if already logged in) */}
+              <Route path={ROUTES.home}           element={<Navigate to={ROUTES.login} replace />} />
+              <Route path={ROUTES.login}          element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
+              <Route path={ROUTES.signup}         element={<PublicOnlyRoute><Signup /></PublicOnlyRoute>} />
+              <Route path={ROUTES.forgotPassword} element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
 
-            {/* Student routes */}
-            <Route path={ROUTES.studentDashboard} element={<StudentDashboard />} />
-            <Route path={ROUTES.studyPlan}         element={<StudyPlan />} />
-            <Route path={ROUTES.subjects}          element={<Subjects />} />
-            <Route path={`${ROUTES.subjects}/:id`} element={<Subjects />} />
-            <Route path={ROUTES.questionBank}      element={<QuestionBank />} />
-            <Route path={ROUTES.mockExams}         element={<MockExams />} />
-            <Route path={ROUTES.aiTutor}           element={<AITutor />} />
-            <Route path={ROUTES.resources}         element={<Resources />} />
-            <Route path={ROUTES.performance}       element={<Performance />} />
-            <Route path={ROUTES.bookmarks}         element={<Bookmarks />} />
-            <Route path={ROUTES.profile}           element={<Profile />} />
+              {/* Auth utility routes (accessible regardless of auth state) */}
+              <Route path={ROUTES.resetPassword}  element={<ResetPassword />} />
+              <Route path={ROUTES.authCallback}   element={<AuthCallback />} />
 
-            {/* Admin routes */}
-            <Route path={ROUTES.adminDashboard} element={<AdminDashboard />} />
+              {/* Student routes */}
+              <Route path={ROUTES.studentDashboard} element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
+              <Route path={ROUTES.studyPlan}         element={<ProtectedRoute><StudyPlan /></ProtectedRoute>} />
+              <Route path={ROUTES.subjects}          element={<ProtectedRoute><Subjects /></ProtectedRoute>} />
+              <Route path={`${ROUTES.subjects}/:id`} element={<ProtectedRoute><Subjects /></ProtectedRoute>} />
+              <Route path={ROUTES.questionBank}      element={<ProtectedRoute><QuestionBank /></ProtectedRoute>} />
+              <Route path={ROUTES.mockExams}         element={<ProtectedRoute><MockExams /></ProtectedRoute>} />
+              <Route path={ROUTES.aiTutor}           element={<ProtectedRoute><AITutor /></ProtectedRoute>} />
+              <Route path={ROUTES.resources}         element={<ProtectedRoute><Resources /></ProtectedRoute>} />
+              <Route path={ROUTES.performance}       element={<ProtectedRoute><Performance /></ProtectedRoute>} />
+              <Route path={ROUTES.bookmarks}         element={<ProtectedRoute><Bookmarks /></ProtectedRoute>} />
+              <Route path={ROUTES.profile}           element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+              {/* Admin routes */}
+              <Route path={ROUTES.adminDashboard} element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              <Route path={ROUTES.adminUsers}     element={<AdminRoute><AdminUsers /></AdminRoute>} />
+
+              {/* 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </AuthProvider>
       </BrowserRouter>
 
       {/* Toast notifications */}

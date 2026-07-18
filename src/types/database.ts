@@ -24,12 +24,39 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['users']['Row'], 'created_at' | 'updated_at'>;
-        Update: Partial<Database['public']['Tables']['users']['Insert']>;
+        Insert: {
+          id: string;
+          email: string;
+          full_name: string;
+          role?: UserRole;
+          account_status?: AccountStatus;
+          preferred_language?: 'en' | 'ar';
+          university?: string | null;
+          graduation_year?: number | null;
+          exam_date?: string | null;
+          weekly_hours?: number | null;
+          previous_attempt?: boolean;
+          avatar_color?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          full_name?: string;
+          role?: UserRole;
+          account_status?: AccountStatus;
+          preferred_language?: 'en' | 'ar';
+          university?: string | null;
+          graduation_year?: number | null;
+          exam_date?: string | null;
+          weekly_hours?: number | null;
+          previous_attempt?: boolean;
+          avatar_color?: string;
+        };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: Record<string, { Args: Record<string, never>; Returns: never }>;
     Enums: {
       user_role: UserRole;
       account_status: AccountStatus;
