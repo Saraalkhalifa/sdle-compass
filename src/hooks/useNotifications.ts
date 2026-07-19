@@ -11,9 +11,8 @@ const QK = ['notifications'] as const;
 
 export function useNotifications() {
   const { session } = useAuth();
-  const queryClient = useQueryClient();
 
-  const query = useQuery({
+  return useQuery({
     queryKey: QK,
     queryFn: async (): Promise<NotificationRow[]> => {
       if (!supabase) throw new Error('Supabase not configured');
@@ -27,13 +26,23 @@ export function useNotifications() {
     },
     enabled: !!supabase && !!session,
   });
+}
 
-  // Realtime: invalidate on INSERT so new notifications arrive instantly
+/**
+ * Call this ONCE from AppShell. Registers the realtime subscription that
+ * invalidates the notifications query on INSERT. Keeping it separate from
+ * useNotifications prevents the "cannot add callbacks after subscribe()" error
+ * that occurs when the hook is called from multiple sibling components.
+ */
+export function useNotificationsSync() {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     if (!supabase || !session?.user?.id) return;
     const client = supabase;
     const channel = client
-      .channel('notifications-realtime')
+      .channel(`notifications-${session.user.id}`)
       .on(
         'postgres_changes',
         {
@@ -47,8 +56,6 @@ export function useNotifications() {
       .subscribe();
     return () => { client.removeChannel(channel); };
   }, [session?.user?.id, queryClient]);
-
-  return query;
 }
 
 export function useUnreadCount() {

@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { MobileNav } from './MobileNav';
 import { CommandPalette } from '@/components/search/CommandPalette';
+import { useNotificationsSync } from '@/hooks/useNotifications';
 import type { UserRole } from '@/types';
 
 interface AppShellProps {
@@ -15,6 +16,7 @@ interface AppShellProps {
 export function AppShell({ children, role = 'student', title, showSearch = false }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen]   = useState(false);
+  useNotificationsSync();
 
   // Cmd+K / Ctrl+K global shortcut
   useEffect(() => {
