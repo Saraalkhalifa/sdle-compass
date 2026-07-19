@@ -126,7 +126,7 @@ export function Signup() {
               type="text"
               value={form.fullName}
               onChange={update('fullName')}
-              placeholder="Dr. Sara Al-Khalifa"
+              placeholder="Your name"
               required
               autoComplete="name"
             />
