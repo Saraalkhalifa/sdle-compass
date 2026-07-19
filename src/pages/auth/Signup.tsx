@@ -4,57 +4,105 @@ import { APP_CONFIG, ROUTES } from '@/config/app';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { supabase } from '@/lib/supabase';
+import {
+  getCurrentConsentVersions,
+  recordConsent,
+  savePendingConsent,
+} from '@/hooks/useLegalConsent';
 
 export function Signup() {
   const { signUp } = useAuth();
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError]     = useState('');
   const [confirmed, setConfirmed] = useState(false);
   const [showOptional, setShowOptional] = useState(false);
 
   const [form, setForm] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    fullName:          '',
+    email:             '',
+    password:          '',
+    confirmPassword:   '',
     preferredLanguage: 'en' as 'en' | 'ar',
-    university: '',
-    graduationYear: '',
-    agreeTerms: false,
+    university:        '',
+    graduationYear:    '',
+    agreeTerms:        false,
+    marketingConsent:  false,
   });
 
-  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+  const update = (field: string) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) =>
     setForm((prev) => ({
       ...prev,
-      [field]: e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value,
+      [field]:
+        e.target.type === 'checkbox'
+          ? (e.target as HTMLInputElement).checked
+          : e.target.value,
     }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!form.fullName.trim()) { setError('Please enter your full name.'); return; }
-    if (form.password.length < 8) { setError('Password must be at least 8 characters.'); return; }
-    if (form.password !== form.confirmPassword) { setError('Passwords do not match.'); return; }
-    if (!form.agreeTerms) { setError('Please agree to the Terms of Service and Privacy Policy.'); return; }
+    if (!form.fullName.trim()) {
+      setError('Please enter your full name.'); return;
+    }
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters.'); return;
+    }
+    if (form.password !== form.confirmPassword) {
+      setError('Passwords do not match.'); return;
+    }
+    if (!form.agreeTerms) {
+      setError('Please agree to the Terms of Service and acknowledge the Privacy Policy.'); return;
+    }
 
     setLoading(true);
+
+    // Fetch current legal version IDs before signup
+    const versions = await getCurrentConsentVersions();
+
     const { error: err, needsConfirmation } = await signUp(
       form.email.trim(),
       form.password,
       form.fullName.trim(),
       form.preferredLanguage,
     );
+
     setLoading(false);
 
     if (err) {
       setError(err);
-    } else if (needsConfirmation) {
-      setConfirmed(true);
+      return;
     }
-    // If no confirmation needed, AuthContext sets the session → PublicOnlyRoute redirects to /onboarding
+
+    if (needsConfirmation) {
+      // Store consent info for when the user confirms their email
+      savePendingConsent({
+        termsVersionId:   versions.termsVersionId,
+        privacyVersionId: versions.privacyVersionId,
+        marketingConsent: form.marketingConsent,
+      });
+      setConfirmed(true);
+    } else {
+      // Auto-confirmed: session is now live — record consent immediately
+      const { data: { user } } = await (supabase?.auth.getUser() ?? Promise.resolve({ data: { user: null } }));
+      if (user) {
+        await recordConsent({
+          userId:          user.id,
+          termsVersionId:  versions.termsVersionId,
+          privacyVersionId: versions.privacyVersionId,
+          marketingConsent: form.marketingConsent,
+          source:          'signup',
+        });
+      }
+      // PublicOnlyRoute / AuthContext redirects to /onboarding
+    }
   };
+
+  // ── Email confirmation screen ─────────────────────────────────────────────
 
   if (confirmed) {
     return (
@@ -85,6 +133,8 @@ export function Signup() {
       </div>
     );
   }
+
+  // ── Registration form ─────────────────────────────────────────────────────
 
   return (
     <div className="min-h-dvh bg-slate-50 flex flex-col items-center justify-center px-4 py-12">
@@ -203,7 +253,7 @@ export function Signup() {
                     type="text"
                     value={form.university}
                     onChange={update('university')}
-                    placeholder="King Abdulaziz University"
+                    placeholder="Your university"
                     autoComplete="organization"
                   />
                   <Input
@@ -219,22 +269,60 @@ export function Signup() {
               )}
             </div>
 
-            {/* Terms checkbox */}
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.agreeTerms}
-                onChange={update('agreeTerms')}
-                required
-                className="mt-0.5 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"
-              />
-              <span className="text-sm text-slate-600 leading-relaxed">
-                I agree to the{' '}
-                <span className="text-blue-600 hover:underline cursor-pointer">Terms of Service</span>{' '}
-                and{' '}
-                <span className="text-blue-600 hover:underline cursor-pointer">Privacy Policy</span>
-              </span>
-            </label>
+            {/* ── Required: Terms + Privacy ──────────────────────────────── */}
+            <div className="space-y-3 pt-1">
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  id="agreeTerms"
+                  type="checkbox"
+                  checked={form.agreeTerms}
+                  onChange={update('agreeTerms')}
+                  required
+                  aria-required="true"
+                  aria-describedby="agreeTerms-desc"
+                  className="mt-0.5 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"
+                />
+                <span id="agreeTerms-desc" className="text-sm text-slate-600 leading-relaxed">
+                  I agree to the{' '}
+                  <Link
+                    to={ROUTES.terms}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline font-medium"
+                    tabIndex={0}
+                  >
+                    Terms of Service
+                  </Link>{' '}
+                  and acknowledge that I have read the{' '}
+                  <Link
+                    to={ROUTES.privacy}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline font-medium"
+                    tabIndex={0}
+                  >
+                    Privacy Policy
+                  </Link>.{' '}
+                  <span className="text-red-500" aria-hidden="true">*</span>
+                </span>
+              </label>
+
+              {/* Optional: Marketing consent */}
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  id="marketingConsent"
+                  type="checkbox"
+                  checked={form.marketingConsent}
+                  onChange={update('marketingConsent')}
+                  aria-describedby="marketingConsent-desc"
+                  className="mt-0.5 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"
+                />
+                <span id="marketingConsent-desc" className="text-sm text-slate-500 leading-relaxed">
+                  I would like to receive optional product updates and promotional messages.{' '}
+                  <span className="text-slate-400 text-xs">(Optional — you can change this in settings)</span>
+                </span>
+              </label>
+            </div>
 
             <Button type="submit" fullWidth size="lg" loading={loading} className="mt-2">
               Create account
@@ -243,7 +331,7 @@ export function Signup() {
         </div>
 
         <p className="text-center text-xs text-slate-400 mt-6 leading-relaxed">
-          {APP_CONFIG.name} is an independent study tool. Not affiliated with or endorsed by the SCHS.
+          {APP_CONFIG.name} is an independent study tool. Not affiliated with or endorsed by SCFHS.
         </p>
       </div>
     </div>

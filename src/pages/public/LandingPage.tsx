@@ -294,13 +294,16 @@ export function LandingPage() {
             </div>
 
             {/* Links */}
-            <nav className="flex items-center gap-5 text-xs" aria-label="Footer navigation">
-              <a href="#" className="hover:text-white transition-colors">
+            <nav className="flex items-center gap-5 text-xs flex-wrap justify-center" aria-label="Footer navigation">
+              <Link to={ROUTES.terms} className="hover:text-white transition-colors">
+                {t('Terms of Service', 'شروط الخدمة')}
+              </Link>
+              <Link to={ROUTES.privacy} className="hover:text-white transition-colors">
                 {t('Privacy Policy', 'سياسة الخصوصية')}
-              </a>
-              <a href="#" className="hover:text-white transition-colors">
-                {t('Terms of Use', 'شروط الاستخدام')}
-              </a>
+              </Link>
+              <Link to={ROUTES.billing} className="hover:text-white transition-colors">
+                {t('Billing Policy', 'سياسة الفوترة')}
+              </Link>
               <a href={`mailto:${APP_CONFIG.supportEmail}`} className="hover:text-white transition-colors">
                 {t('Support', 'الدعم')}
               </a>

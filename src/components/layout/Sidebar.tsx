@@ -85,6 +85,7 @@ function getAdminNavItems(): { section: string; sectionAr: string; items: NavIte
       items: [
         { label: 'Analytics',   labelAr: 'التحليلات', href: ROUTES.adminAnalytics,  icon: icons.analytics },
         { label: 'Audit Logs',  labelAr: 'سجل المراجعة', href: ROUTES.adminAuditLogs, icon: icons.audit },
+        { label: 'Legal Docs',  labelAr: 'الوثائق القانونية', href: ROUTES.adminLegal, icon: icons.settings },
         { label: 'Settings',    labelAr: 'الإعدادات', href: ROUTES.adminSettings,   icon: icons.settings },
       ],
     },

@@ -2,10 +2,11 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { ROUTES } from '@/config/app';
+import { recordConsent, loadPendingConsent, clearPendingConsent } from '@/hooks/useLegalConsent';
 
 /**
  * Handles the email confirmation redirect from Supabase.
- * detectSessionInUrl processes the token; we just wait and redirect.
+ * Also processes any pending legal consent saved before email confirmation.
  */
 export function AuthCallback() {
   const navigate = useNavigate();
@@ -13,8 +14,25 @@ export function AuthCallback() {
   useEffect(() => {
     if (!supabase) { navigate(ROUTES.login, { replace: true }); return; }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN') {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        // Process any pending consent that was saved before email confirmation
+        const pending = loadPendingConsent();
+        if (pending) {
+          try {
+            await recordConsent({
+              userId:           session.user.id,
+              termsVersionId:   pending.termsVersionId,
+              privacyVersionId: pending.privacyVersionId,
+              marketingConsent: pending.marketingConsent,
+              source:           'signup',
+            });
+          } catch {
+            // Non-fatal: consent recording failure should not block access
+          } finally {
+            clearPendingConsent();
+          }
+        }
         navigate(ROUTES.studentDashboard, { replace: true });
       } else if (event === 'USER_UPDATED') {
         navigate(ROUTES.login, { replace: true });

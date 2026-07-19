@@ -43,6 +43,12 @@ export const ROUTES = {
   bookmarks: '/bookmarks',
   profile: '/profile',
 
+  // Legal (public)
+  terms: '/terms',
+  privacy: '/privacy',
+  billing: '/billing',
+  cookies: '/cookies',
+
   // Admin
   adminDashboard: '/admin',
   adminSubjects: '/admin/subjects',
@@ -61,6 +67,7 @@ export const ROUTES = {
   adminAnalytics: '/admin/analytics',
   adminAuditLogs: '/admin/audit-logs',
   adminSettings: '/admin/settings',
+  adminLegal: '/admin/legal',
 } as const;
 
 /** Feature flags — toggles for features not yet complete */

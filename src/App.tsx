@@ -52,9 +52,13 @@ import { AdminNotes } from '@/pages/admin/AdminNotes';
 import { AdminVideos } from '@/pages/admin/AdminVideos';
 import { AdminAuditLogs } from '@/pages/admin/AdminAuditLogs';
 import { AdminSettings } from '@/pages/admin/AdminSettings';
+import { AdminLegal }    from '@/pages/admin/AdminLegal';
 
 // Public pages
-import { LandingPage } from '@/pages/public/LandingPage';
+import { LandingPage }    from '@/pages/public/LandingPage';
+import { TermsOfService } from '@/pages/public/TermsOfService';
+import { PrivacyPolicy }  from '@/pages/public/PrivacyPolicy';
+import { BillingPolicy }  from '@/pages/public/BillingPolicy';
 
 // 404
 import { NotFound } from '@/pages/NotFound';
@@ -110,7 +114,12 @@ export function App() {
           <Suspense fallback={<PageLoader />}>
             <Routes>
               {/* Public-only routes (redirect to dashboard if already logged in) */}
-              <Route path={ROUTES.home}           element={<LandingPage />} />
+              {/* Public landing + legal (accessible to everyone) */}
+              <Route path={ROUTES.home}    element={<LandingPage />} />
+              <Route path={ROUTES.terms}   element={<TermsOfService />} />
+              <Route path={ROUTES.privacy} element={<PrivacyPolicy />} />
+              <Route path={ROUTES.billing} element={<BillingPolicy />} />
+
               <Route path={ROUTES.login}          element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
               <Route path={ROUTES.signup}         element={<PublicOnlyRoute><Signup /></PublicOnlyRoute>} />
               <Route path={ROUTES.forgotPassword} element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
@@ -157,6 +166,7 @@ export function App() {
               <Route path={ROUTES.adminVideos}                               element={<AdminRoute><AdminVideos /></AdminRoute>} />
               <Route path={ROUTES.adminAuditLogs}                            element={<AdminRoute><AdminAuditLogs /></AdminRoute>} />
               <Route path={ROUTES.adminSettings}                             element={<AdminRoute><AdminSettings /></AdminRoute>} />
+              <Route path={ROUTES.adminLegal}                                element={<AdminRoute><AdminLegal /></AdminRoute>} />
 
               {/* 404 */}
               <Route path="*" element={<NotFound />} />

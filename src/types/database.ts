@@ -566,6 +566,114 @@ export interface Database {
         };
         Relationships: [];
       };
+      legal_documents: {
+        Row: {
+          id: string;
+          type: 'terms' | 'privacy' | 'billing' | 'cookies' | 'cancellation' | 'acceptable_use';
+          created_at: string;
+        };
+        Insert: {
+          type: 'terms' | 'privacy' | 'billing' | 'cookies' | 'cancellation' | 'acceptable_use';
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      legal_document_versions: {
+        Row: {
+          id: string;
+          document_id: string;
+          version: string;
+          status: 'draft' | 'ai_draft' | 'awaiting_review' | 'approved' | 'scheduled' | 'published' | 'superseded' | 'archived';
+          is_material_change: boolean;
+          change_summary_en: string | null;
+          change_summary_ar: string | null;
+          effective_date: string | null;
+          content_en: string | null;
+          content_ar: string | null;
+          content_hash: string | null;
+          published_at: string | null;
+          published_by: string | null;
+          legal_review_status: 'pending' | 'in_review' | 'approved' | 'not_required';
+          legal_reviewed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          document_id: string;
+          version: string;
+          status?: 'draft' | 'ai_draft' | 'awaiting_review' | 'approved' | 'scheduled' | 'published' | 'superseded' | 'archived';
+          is_material_change?: boolean;
+          change_summary_en?: string | null;
+          change_summary_ar?: string | null;
+          effective_date?: string | null;
+          content_en?: string | null;
+          content_ar?: string | null;
+          published_by?: string | null;
+          legal_review_status?: 'pending' | 'in_review' | 'approved' | 'not_required';
+        };
+        Update: {
+          status?: 'draft' | 'ai_draft' | 'awaiting_review' | 'approved' | 'scheduled' | 'published' | 'superseded' | 'archived';
+          is_material_change?: boolean;
+          change_summary_en?: string | null;
+          change_summary_ar?: string | null;
+          effective_date?: string | null;
+          content_en?: string | null;
+          content_ar?: string | null;
+          content_hash?: string | null;
+          published_at?: string | null;
+          published_by?: string | null;
+          legal_review_status?: 'pending' | 'in_review' | 'approved' | 'not_required';
+          legal_reviewed_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      user_legal_acceptances: {
+        Row: {
+          id: string;
+          user_id: string;
+          document_version_id: string;
+          accepted_at: string;
+          acceptance_source: 'signup' | 'reaccept' | 'settings';
+          is_required: boolean;
+        };
+        Insert: {
+          user_id: string;
+          document_version_id: string;
+          acceptance_source?: 'signup' | 'reaccept' | 'settings';
+          is_required?: boolean;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      user_consent_preferences: {
+        Row: {
+          user_id: string;
+          marketing_consent: boolean;
+          marketing_consent_at: string | null;
+          marketing_consent_withdrawn_at: string | null;
+          analytics_consent: boolean;
+          analytics_consent_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          marketing_consent?: boolean;
+          marketing_consent_at?: string | null;
+          analytics_consent?: boolean;
+          analytics_consent_at?: string | null;
+        };
+        Update: {
+          marketing_consent?: boolean;
+          marketing_consent_at?: string | null;
+          marketing_consent_withdrawn_at?: string | null;
+          analytics_consent?: boolean;
+          analytics_consent_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       onboarding_progress: {
         Row: {
           id: string; user_id: string; last_step: number;
