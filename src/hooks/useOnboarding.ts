@@ -84,7 +84,9 @@ export function useOnboarding() {
           subject_id: c.subject_id,
           confidence_level: c.confidence_level,
         })),
-        subjects: (subjects ?? []) as SubjectOption[],
+        subjects: Array.from(
+          new Map((subjects ?? []).map((s) => [s.name, s])).values()
+        ) as SubjectOption[],
       });
     })();
   }, [userId]);
