@@ -53,6 +53,9 @@ import { AdminVideos } from '@/pages/admin/AdminVideos';
 import { AdminAuditLogs } from '@/pages/admin/AdminAuditLogs';
 import { AdminSettings } from '@/pages/admin/AdminSettings';
 
+// Public pages
+import { LandingPage } from '@/pages/public/LandingPage';
+
 // 404
 import { NotFound } from '@/pages/NotFound';
 
@@ -101,13 +104,13 @@ export function App() {
   return (
     <LanguageProvider>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AuthProvider>
           <LanguageSyncer />
           <Suspense fallback={<PageLoader />}>
             <Routes>
               {/* Public-only routes (redirect to dashboard if already logged in) */}
-              <Route path={ROUTES.home}           element={<Navigate to={ROUTES.login} replace />} />
+              <Route path={ROUTES.home}           element={<LandingPage />} />
               <Route path={ROUTES.login}          element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
               <Route path={ROUTES.signup}         element={<PublicOnlyRoute><Signup /></PublicOnlyRoute>} />
               <Route path={ROUTES.forgotPassword} element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />

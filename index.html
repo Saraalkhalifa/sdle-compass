@@ -2,14 +2,35 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/compass.svg" />
+    <link rel="icon" type="image/svg+xml" href="./compass.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="SDLE Compass — Your complete study companion for the Saudi Dental Licensure Examination" />
+    <meta name="description" content="SDLE Compass — Prepare for the Saudi Dental Licensure Examination with personalized study plans, practice questions, AI tutoring, and mock exams." />
     <meta name="theme-color" content="#1d4ed8" />
+    <meta property="og:title" content="SDLE Compass" />
+    <meta property="og:description" content="Your complete study companion for the Saudi Dental Licensure Examination." />
+    <meta property="og:type" content="website" />
     <title>SDLE Compass</title>
+
+    <!-- SPA redirect handler for GitHub Pages -->
+    <!-- Receives the encoded path from 404.html and restores it via history.replaceState -->
+    <script>
+      (function (l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function (s) {
+            return s.replace(/~and~/g, '&');
+          });
+          window.history.replaceState(
+            null, null,
+            l.pathname.slice(0, -1) + decoded.shift() +
+            (decoded.length ? '?' + decoded.join('&') : '') +
+            l.hash
+          );
+        }
+      }(window.location));
+    </script>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>

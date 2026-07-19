@@ -22,7 +22,7 @@ const EVENT_TYPES = [
     color: 'bg-amber-50 border-amber-100',
     label: 'Account actions',
     desc: 'Student accounts suspended, activated, or role changes.',
-    examples: ['student suspended: user@iau.edu.sa', 'account reactivated', 'role changed to editor'],
+    examples: ['student suspended: user@example.com', 'account reactivated', 'role changed to editor'],
   },
   {
     icon: '🤖',
