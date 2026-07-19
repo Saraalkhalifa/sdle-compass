@@ -1,7 +1,8 @@
 -- ============================================================
 -- SDLE Compass — Supabase Production Schema
--- Phase 1: Core user/auth tables
+-- Phase 1+2: Core user/auth tables
 -- Run in: Supabase Dashboard → SQL Editor → New Query
+-- Safe to re-run: all statements are idempotent
 -- ============================================================
 
 create extension if not exists "uuid-ossp";
@@ -56,31 +57,33 @@ returns trigger language plpgsql as $$
 begin new.updated_at = now(); return new; end;
 $$;
 
+drop trigger if exists users_updated_at on public.users;
 create trigger users_updated_at
   before update on public.users
   for each row execute procedure public.touch_updated_at();
 
--- ── ROW LEVEL SECURITY ────────────────────────────────────────────
+-- ── ROW LEVEL SECURITY — USERS ────────────────────────────────────
 alter table public.users enable row level security;
 
--- Users can read their own row
+drop policy if exists "Users: read own" on public.users;
 create policy "Users: read own" on public.users
   for select using (auth.uid() = id);
 
--- Users can update their own non-role fields
+drop policy if exists "Users: update own (no role change)" on public.users;
 create policy "Users: update own (no role change)" on public.users
   for update using (auth.uid() = id)
   with check (auth.uid() = id and role = (select role from public.users where id = auth.uid()));
 
--- Admins can read all users
 create or replace function public.is_admin()
 returns boolean language sql security definer stable set search_path = public as $$
   select role in ('admin', 'main_admin') from public.users where id = auth.uid();
 $$;
 
+drop policy if exists "Admins: read all users" on public.users;
 create policy "Admins: read all users" on public.users
   for select using (public.is_admin());
 
+drop policy if exists "Admins: update all users" on public.users;
 create policy "Admins: update all users" on public.users
   for update using (public.is_admin());
 
@@ -103,12 +106,15 @@ create table if not exists public.subjects (
 
 alter table public.subjects enable row level security;
 
+drop policy if exists "Subjects: all read published" on public.subjects;
 create policy "Subjects: all read published" on public.subjects
   for select using (is_active = true or public.is_admin());
 
+drop policy if exists "Subjects: admin write" on public.subjects;
 create policy "Subjects: admin write" on public.subjects
   for all using (public.is_admin());
 
+drop trigger if exists subjects_updated_at on public.subjects;
 create trigger subjects_updated_at
   before update on public.subjects
   for each row execute procedure public.touch_updated_at();
@@ -128,10 +134,16 @@ create table if not exists public.topics (
 );
 
 alter table public.topics enable row level security;
+
+drop policy if exists "Topics: read active" on public.topics;
 create policy "Topics: read active" on public.topics
   for select using (is_active = true or public.is_admin());
+
+drop policy if exists "Topics: admin write" on public.topics;
 create policy "Topics: admin write" on public.topics
   for all using (public.is_admin());
+
+drop trigger if exists topics_updated_at on public.topics;
 create trigger topics_updated_at
   before update on public.topics
   for each row execute procedure public.touch_updated_at();
@@ -149,8 +161,12 @@ create table if not exists public.audit_logs (
 );
 
 alter table public.audit_logs enable row level security;
+
+drop policy if exists "Audit: admin read" on public.audit_logs;
 create policy "Audit: admin read" on public.audit_logs
   for select using (public.is_admin());
+
+drop policy if exists "Audit: system insert" on public.audit_logs;
 create policy "Audit: system insert" on public.audit_logs
   for insert with check (true);
 

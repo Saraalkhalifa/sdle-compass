@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { APP_CONFIG, ROUTES, FEATURES } from '@/config/app';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { UserRole } from '@/types';
 
 interface NavItem {
   label: string;
+  labelAr: string;
   href: string;
   icon: React.ReactNode;
   badge?: number;
   comingSoon?: boolean;
-  section?: string;
 }
 
 // ── Icons (inline SVG to avoid large icon bundle in Phase 1) ──────────────────
@@ -37,54 +38,54 @@ const icons = {
 
 function getStudentNavItems(): NavItem[] {
   return [
-    { label: 'Dashboard',     href: ROUTES.studentDashboard, icon: icons.dashboard },
-    { label: 'Study Plan',    href: ROUTES.studyPlan,        icon: icons.studyPlan,   comingSoon: !FEATURES.studyPlan },
-    { label: 'Subjects',      href: ROUTES.subjects,         icon: icons.subjects },
-    { label: 'Question Bank', href: ROUTES.questionBank,     icon: icons.questions },
-    { label: 'Mock Exams',    href: ROUTES.mockExams,        icon: icons.mockExams,   comingSoon: !FEATURES.mockExams },
-    { label: 'AI Tutor',      href: ROUTES.aiTutor,          icon: icons.aiTutor,     comingSoon: !FEATURES.aiTutor },
-    { label: 'Resources',     href: ROUTES.resources,        icon: icons.resources },
-    { label: 'Performance',   href: ROUTES.performance,      icon: icons.performance, comingSoon: !FEATURES.analytics },
-    { label: 'Bookmarks',     href: ROUTES.bookmarks,        icon: icons.bookmarks },
-    { label: 'Profile',       href: ROUTES.profile,          icon: icons.profile },
+    { label: 'Dashboard',     labelAr: 'لوحة التحكم',          href: ROUTES.studentDashboard, icon: icons.dashboard },
+    { label: 'Study Plan',    labelAr: 'خطة الدراسة',           href: ROUTES.studyPlan,        icon: icons.studyPlan,   comingSoon: !FEATURES.studyPlan },
+    { label: 'Subjects',      labelAr: 'المواد الدراسية',        href: ROUTES.subjects,         icon: icons.subjects },
+    { label: 'Question Bank', labelAr: 'بنك الأسئلة',           href: ROUTES.questionBank,     icon: icons.questions },
+    { label: 'Mock Exams',    labelAr: 'اختبارات تجريبية',       href: ROUTES.mockExams,        icon: icons.mockExams,   comingSoon: !FEATURES.mockExams },
+    { label: 'AI Tutor',      labelAr: 'المعلم الذكي',           href: ROUTES.aiTutor,          icon: icons.aiTutor,     comingSoon: !FEATURES.aiTutor },
+    { label: 'Resources',     labelAr: 'المصادر',               href: ROUTES.resources,        icon: icons.resources },
+    { label: 'Performance',   labelAr: 'الأداء',                href: ROUTES.performance,      icon: icons.performance, comingSoon: !FEATURES.analytics },
+    { label: 'Bookmarks',     labelAr: 'المحفوظات',             href: ROUTES.bookmarks,        icon: icons.bookmarks },
+    { label: 'Profile',       labelAr: 'الملف الشخصي',          href: ROUTES.profile,          icon: icons.profile },
   ];
 }
 
-function getAdminNavItems(): { section: string; items: NavItem[] }[] {
+function getAdminNavItems(): { section: string; sectionAr: string; items: NavItem[] }[] {
   return [
     {
-      section: 'Overview',
+      section: 'Overview', sectionAr: 'نظرة عامة',
       items: [
-        { label: 'Admin Overview',   href: ROUTES.adminDashboard,        icon: icons.dashboard },
+        { label: 'Admin Overview',   labelAr: 'لوحة الإدارة',      href: ROUTES.adminDashboard,        icon: icons.dashboard },
       ],
     },
     {
-      section: 'Content',
+      section: 'Content', sectionAr: 'المحتوى',
       items: [
-        { label: 'Subjects & Curriculum', href: ROUTES.adminSubjects,         icon: icons.subjects },
-        { label: 'Resources',             href: ROUTES.adminResources,        icon: icons.resources },
-        { label: 'Videos & Transcripts',  href: ROUTES.adminVideos,           icon: icons.video },
-        { label: 'Notes',                 href: ROUTES.adminNotes,            icon: icons.notes },
-        { label: 'Question Bank',         href: ROUTES.adminQuestions,        icon: icons.questions },
-        { label: 'Question Imports',      href: ROUTES.adminQuestionImports,  icon: icons.upload },
-        { label: 'AI Review Queue',       href: ROUTES.adminAIQueue,          icon: icons.aiTutor },
-        { label: 'Mock Exams',            href: ROUTES.adminMockExams,        icon: icons.mockExams },
+        { label: 'Subjects & Curriculum', labelAr: 'المواد والمناهج',    href: ROUTES.adminSubjects,         icon: icons.subjects },
+        { label: 'Resources',             labelAr: 'المصادر',             href: ROUTES.adminResources,        icon: icons.resources },
+        { label: 'Videos & Transcripts',  labelAr: 'الفيديوهات والنصوص', href: ROUTES.adminVideos,           icon: icons.video },
+        { label: 'Notes',                 labelAr: 'الملاحظات',           href: ROUTES.adminNotes,            icon: icons.notes },
+        { label: 'Question Bank',         labelAr: 'بنك الأسئلة',         href: ROUTES.adminQuestions,        icon: icons.questions },
+        { label: 'Question Imports',      labelAr: 'استيراد الأسئلة',     href: ROUTES.adminQuestionImports,  icon: icons.upload },
+        { label: 'AI Review Queue',       labelAr: 'طابور مراجعة الذكاء', href: ROUTES.adminAIQueue,          icon: icons.aiTutor },
+        { label: 'Mock Exams',            labelAr: 'اختبارات تجريبية',    href: ROUTES.adminMockExams,        icon: icons.mockExams },
       ],
     },
     {
-      section: 'Management',
+      section: 'Management', sectionAr: 'الإدارة',
       items: [
-        { label: 'Student Reports', href: ROUTES.adminStudents,     icon: icons.users },
-        { label: 'Error Reports',   href: ROUTES.adminErrorReports, icon: icons.alert },
-        { label: 'Users & Roles',   href: ROUTES.adminUsers,        icon: icons.users },
+        { label: 'Student Reports', labelAr: 'تقارير الطلاب', href: ROUTES.adminStudents,     icon: icons.users },
+        { label: 'Error Reports',   labelAr: 'تقارير الأخطاء', href: ROUTES.adminErrorReports, icon: icons.alert },
+        { label: 'Users & Roles',   labelAr: 'المستخدمون والأدوار', href: ROUTES.adminUsers,  icon: icons.users },
       ],
     },
     {
-      section: 'System',
+      section: 'System', sectionAr: 'النظام',
       items: [
-        { label: 'Analytics',   href: ROUTES.adminAnalytics,  icon: icons.analytics },
-        { label: 'Audit Logs',  href: ROUTES.adminAuditLogs,  icon: icons.audit },
-        { label: 'Settings',    href: ROUTES.adminSettings,   icon: icons.settings },
+        { label: 'Analytics',   labelAr: 'التحليلات', href: ROUTES.adminAnalytics,  icon: icons.analytics },
+        { label: 'Audit Logs',  labelAr: 'سجل المراجعة', href: ROUTES.adminAuditLogs, icon: icons.audit },
+        { label: 'Settings',    labelAr: 'الإعدادات', href: ROUTES.adminSettings,   icon: icons.settings },
       ],
     },
   ];
@@ -99,13 +100,16 @@ interface SidebarProps {
 }
 
 function NavItemLink({ item }: { item: NavItem }) {
+  const { lang } = useLanguage();
+  const displayLabel = lang === 'ar' ? item.labelAr : item.label;
+
   if (item.comingSoon) {
     return (
       <div className="nav-item opacity-50 cursor-not-allowed select-none" aria-disabled="true" title="Coming soon">
         <span className="icon">{item.icon}</span>
-        <span className="flex-1 min-w-0">{item.label}</span>
+        <span className="flex-1 min-w-0">{displayLabel}</span>
         <span className="text-xs bg-slate-700/50 text-slate-400 px-1.5 py-0.5 rounded text-[10px] font-medium flex-shrink-0">
-          Soon
+          {lang === 'ar' ? 'قريباً' : 'Soon'}
         </span>
       </div>
     );
@@ -118,7 +122,7 @@ function NavItemLink({ item }: { item: NavItem }) {
       end={item.href === ROUTES.studentDashboard || item.href === ROUTES.adminDashboard}
     >
       <span className="icon">{item.icon}</span>
-      <span className="flex-1 min-w-0 truncate">{item.label}</span>
+      <span className="flex-1 min-w-0 truncate">{displayLabel}</span>
       {item.badge !== undefined && (
         <span className="text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded-full min-w-5 text-center leading-none flex-shrink-0">
           {item.badge}
@@ -129,6 +133,7 @@ function NavItemLink({ item }: { item: NavItem }) {
 }
 
 export function Sidebar({ role, isOpen, onClose }: SidebarProps) {
+  const { lang } = useLanguage();
   const isAdmin = role === 'admin' || role === 'main_admin' || role === 'editor' || role === 'reviewer';
 
   return (
@@ -142,16 +147,16 @@ export function Sidebar({ role, isOpen, onClose }: SidebarProps) {
         />
       )}
 
-      {/* Sidebar panel */}
+      {/* Sidebar panel — left for LTR, right for RTL */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-40 h-dvh flex flex-col',
+          'fixed top-0 z-40 h-dvh flex flex-col',
+          'ltr:left-0 rtl:right-0',
           'bg-slate-800 text-slate-100',
           'transition-transform duration-300',
           'w-[260px]',
-          // Mobile: slide in/out. Desktop: always visible.
           isOpen !== undefined
-            ? isOpen ? 'translate-x-0' : '-translate-x-full'
+            ? isOpen ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'
             : 'hidden lg:flex',
           'lg:translate-x-0',
         )}
@@ -165,8 +170,12 @@ export function Sidebar({ role, isOpen, onClose }: SidebarProps) {
             </svg>
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-white truncate">{APP_CONFIG.name}</p>
-            <p className="text-xs text-slate-400 truncate">{APP_CONFIG.examAbbreviation} Preparation</p>
+            <p className="text-sm font-bold text-white truncate">
+              {lang === 'ar' ? APP_CONFIG.nameAr : APP_CONFIG.name}
+            </p>
+            <p className="text-xs text-slate-400 truncate">
+              {lang === 'ar' ? 'الإعداد للاختبار' : `${APP_CONFIG.examAbbreviation} Preparation`}
+            </p>
           </div>
         </div>
 
@@ -176,7 +185,7 @@ export function Sidebar({ role, isOpen, onClose }: SidebarProps) {
             getAdminNavItems().map((group) => (
               <div key={group.section} className="mb-3">
                 <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-                  {group.section}
+                  {lang === 'ar' ? group.sectionAr : group.section}
                 </p>
                 <div className="space-y-0.5">
                   {group.items.map((item) => (
@@ -200,7 +209,9 @@ export function Sidebar({ role, isOpen, onClose }: SidebarProps) {
             <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
               S
             </div>
-            <span className="flex-1 min-w-0 truncate text-slate-300">My Profile</span>
+            <span className="flex-1 min-w-0 truncate text-slate-300">
+              {lang === 'ar' ? 'ملفي الشخصي' : 'My Profile'}
+            </span>
           </NavLink>
         </div>
       </aside>

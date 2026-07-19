@@ -16,7 +16,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isConfigured: boolean;
   signIn: (email: string, password: string) => Promise<SignInResult>;
-  signUp: (email: string, password: string, fullName: string) => Promise<SignUpResult>;
+  signUp: (email: string, password: string, fullName: string, preferredLanguage?: 'en' | 'ar') => Promise<SignUpResult>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
   updateProfile: (updates: Partial<Omit<User, 'id' | 'email' | 'role' | 'created_at'>>) => Promise<{ error: string | null }>;
@@ -120,13 +120,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   }, []);
 
-  const signUp = useCallback(async (email: string, password: string, fullName: string): Promise<SignUpResult> => {
+  const signUp = useCallback(async (email: string, password: string, fullName: string, preferredLanguage: 'en' | 'ar' = 'en'): Promise<SignUpResult> => {
     if (!supabase) return { error: 'Supabase is not configured.', needsConfirmation: false };
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName, role: 'student' },
+        data: { full_name: fullName, role: 'student', preferred_language: preferredLanguage },
       },
     });
     if (error) return { error: error.message, needsConfirmation: false };

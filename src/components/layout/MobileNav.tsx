@@ -2,10 +2,11 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/config/app';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const mobileItems = [
   {
-    label: 'Dashboard',
+    label: 'Dashboard', labelAr: 'الرئيسية',
     href: ROUTES.studentDashboard,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
@@ -15,7 +16,7 @@ const mobileItems = [
     ),
   },
   {
-    label: 'Subjects',
+    label: 'Subjects', labelAr: 'المواد',
     href: ROUTES.subjects,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
@@ -24,7 +25,7 @@ const mobileItems = [
     ),
   },
   {
-    label: 'Questions',
+    label: 'Questions', labelAr: 'الأسئلة',
     href: ROUTES.questionBank,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
@@ -35,7 +36,7 @@ const mobileItems = [
     ),
   },
   {
-    label: 'Resources',
+    label: 'Resources', labelAr: 'المصادر',
     href: ROUTES.resources,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
@@ -44,7 +45,7 @@ const mobileItems = [
     ),
   },
   {
-    label: 'More',
+    label: 'More', labelAr: 'المزيد',
     href: ROUTES.profile,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
@@ -55,10 +56,12 @@ const mobileItems = [
 ];
 
 export function MobileNav() {
+  const { lang } = useLanguage();
+
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-slate-200 flex lg:hidden safe-area-pb"
-      aria-label="Mobile navigation"
+      aria-label={lang === 'ar' ? 'التنقل في التطبيق' : 'Mobile navigation'}
     >
       {mobileItems.map((item) => (
         <NavLink
@@ -75,7 +78,7 @@ export function MobileNav() {
           {({ isActive }) => (
             <>
               <span className={cn(isActive && 'text-blue-600')}>{item.icon}</span>
-              <span>{item.label}</span>
+              <span>{lang === 'ar' ? item.labelAr : item.label}</span>
             </>
           )}
         </NavLink>

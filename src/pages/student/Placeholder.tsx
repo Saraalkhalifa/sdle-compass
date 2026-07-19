@@ -34,10 +34,3 @@ export function PlaceholderPage({ title, description, phase }: PlaceholderPagePr
   );
 }
 
-export function StudyPlan()   { return <PlaceholderPage title="Study Plan"    phase={10} />; }
-export function QuestionBank(){ return <PlaceholderPage title="Question Bank" phase={6}  />; }
-export function MockExams()   { return <PlaceholderPage title="Mock Exams"    phase={8}  />; }
-export function AITutor()     { return <PlaceholderPage title="AI Tutor"      phase={11} />; }
-export function Resources()   { return <PlaceholderPage title="Resources"     phase={4}  />; }
-export function Performance() { return <PlaceholderPage title="Performance"   phase={9}  />; }
-export function Bookmarks()   { return <PlaceholderPage title="Bookmarks"     phase={3}  />; }

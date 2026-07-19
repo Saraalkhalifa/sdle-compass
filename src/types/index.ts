@@ -17,6 +17,7 @@ export interface User {
   weekly_hours?: number;
   previous_attempt: boolean;
   avatar_color: string;
+  onboarding_completed: boolean;
   created_at: string;
 }
 

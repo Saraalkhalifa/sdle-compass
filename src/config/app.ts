@@ -24,6 +24,7 @@ export const ROUTES = {
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
   authCallback: '/auth/callback',
+  onboarding: '/onboarding',
 
   // Student
   studentDashboard: '/dashboard',
@@ -31,8 +32,11 @@ export const ROUTES = {
   subjects: '/subjects',
   subject: (id: string) => `/subjects/${id}`,
   topic: (subjectId: string, topicId: string) => `/subjects/${subjectId}/topics/${topicId}`,
+  flashcardStudy: (subjectId: string, topicId: string, deckId: string) => `/subjects/${subjectId}/topics/${topicId}/flashcards/${deckId}`,
   questionBank: '/questions',
   mockExams: '/mock-exams',
+  examSession: (examId: string, sessionId: string) => `/mock-exams/${examId}/session/${sessionId}`,
+  examResults: (examId: string, sessionId: string) => `/mock-exams/${examId}/session/${sessionId}/results`,
   aiTutor: '/ai-tutor',
   resources: '/resources',
   performance: '/performance',
@@ -42,6 +46,8 @@ export const ROUTES = {
   // Admin
   adminDashboard: '/admin',
   adminSubjects: '/admin/subjects',
+  adminSubjectDetail: (id: string) => `/admin/subjects/${id}`,
+  adminTopicDetail: (subjectId: string, topicId: string) => `/admin/subjects/${subjectId}/topics/${topicId}`,
   adminResources: '/admin/resources',
   adminVideos: '/admin/videos',
   adminNotes: '/admin/notes',
@@ -59,14 +65,14 @@ export const ROUTES = {
 
 /** Feature flags — toggles for features not yet complete */
 export const FEATURES = {
-  aiTutor: false,         // Phase 11
-  mockExams: false,        // Phase 8
-  studyPlan: false,        // Phase 10
-  flashcards: false,       // Phase 5
-  pdfReader: false,        // Phase 4
-  videoPlayer: false,      // Phase 4
-  analytics: false,        // Phase 9
-  globalSearch: false,     // Phase 14
-  arabicUI: false,         // Phase 16
-  notifications: false,    // Phase 17
+  aiTutor: true,          // Phase 11 ✓
+  mockExams: true,         // Phase 8 ✓
+  studyPlan: true,         // Phase 10 ✓
+  flashcards: true,        // Phase 5 ✓
+  pdfReader: true,         // Phase 4 ✓
+  videoPlayer: true,       // Phase 4 ✓
+  analytics: true,         // Phase 9 ✓
+  globalSearch: true,      // Phase 14 ✓
+  arabicUI: true,          // Phase 16 ✓
+  notifications: true,     // Phase 17 ✓
 } as const;

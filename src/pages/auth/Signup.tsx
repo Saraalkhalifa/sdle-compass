@@ -7,31 +7,53 @@ import { Input } from '@/components/ui/Input';
 
 export function Signup() {
   const { signUp } = useAuth();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirmed, setConfirmed] = useState(false);
-  const [form, setForm] = useState({ fullName: '', email: '', password: '', confirmPassword: '' });
+  const [showOptional, setShowOptional] = useState(false);
 
-  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  const [form, setForm] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    preferredLanguage: 'en' as 'en' | 'ar',
+    university: '',
+    graduationYear: '',
+    agreeTerms: false,
+  });
+
+  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setForm((prev) => ({
+      ...prev,
+      [field]: e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value,
+    }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (!form.fullName.trim()) { setError('Please enter your full name.'); return; }
-    if (form.password !== form.confirmPassword) { setError('Passwords do not match.'); return; }
     if (form.password.length < 8) { setError('Password must be at least 8 characters.'); return; }
+    if (form.password !== form.confirmPassword) { setError('Passwords do not match.'); return; }
+    if (!form.agreeTerms) { setError('Please agree to the Terms of Service and Privacy Policy.'); return; }
 
     setLoading(true);
-    const { error: err, needsConfirmation } = await signUp(form.email.trim(), form.password, form.fullName.trim());
+    const { error: err, needsConfirmation } = await signUp(
+      form.email.trim(),
+      form.password,
+      form.fullName.trim(),
+      form.preferredLanguage,
+    );
     setLoading(false);
+
     if (err) {
       setError(err);
     } else if (needsConfirmation) {
       setConfirmed(true);
     }
-    // If no confirmation needed, AuthContext will set the session and PublicOnlyRoute redirects automatically
+    // If no confirmation needed, AuthContext sets the session → PublicOnlyRoute redirects to /onboarding
   };
 
   if (confirmed) {
@@ -47,11 +69,13 @@ export function Signup() {
             <h2 className="text-lg font-bold text-slate-900 mb-2">Check your email</h2>
             <p className="text-sm text-slate-500 leading-relaxed">
               We sent a confirmation link to <strong>{form.email}</strong>.
-              Click it to activate your account.
+              Click it to activate your account and start your personalized setup.
             </p>
             <p className="text-xs text-slate-400 mt-4">
               Didn't receive it? Check your spam folder or{' '}
-              <button onClick={() => setConfirmed(false)} className="text-blue-600 hover:underline">try again</button>.
+              <button onClick={() => setConfirmed(false)} className="text-blue-600 hover:underline">
+                try again
+              </button>.
             </p>
             <Link to={ROUTES.login} className="block mt-6 text-sm text-blue-600 hover:underline">
               Back to sign in
@@ -87,7 +111,11 @@ export function Signup() {
           </p>
 
           {error && (
-            <div role="alert" className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
+            <div role="alert" className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <path strokeLinecap="round" d="M12 8v4m0 4h.01"/>
+              </svg>
               {error}
             </div>
           )}
@@ -102,6 +130,7 @@ export function Signup() {
               required
               autoComplete="name"
             />
+
             <Input
               label="Email address"
               type="email"
@@ -111,6 +140,7 @@ export function Signup() {
               required
               autoComplete="email"
             />
+
             <Input
               label="Password"
               type="password"
@@ -121,6 +151,7 @@ export function Signup() {
               autoComplete="new-password"
               helperText="At least 8 characters"
             />
+
             <Input
               label="Confirm password"
               type="password"
@@ -131,6 +162,80 @@ export function Signup() {
               autoComplete="new-password"
             />
 
+            {/* Language preference */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Preferred language
+              </label>
+              <select
+                value={form.preferredLanguage}
+                onChange={update('preferredLanguage')}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
+              >
+                <option value="en">English</option>
+                <option value="ar">Arabic — عربي</option>
+              </select>
+            </div>
+
+            {/* Optional academic info */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowOptional(!showOptional)}
+                className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                aria-expanded={showOptional}
+              >
+                <svg
+                  width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5"
+                  className={`transition-transform ${showOptional ? 'rotate-90' : ''}`}
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+                </svg>
+                {showOptional ? 'Hide' : 'Add'} academic info (optional)
+              </button>
+
+              {showOptional && (
+                <div className="mt-3 space-y-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <Input
+                    label="University"
+                    type="text"
+                    value={form.university}
+                    onChange={update('university')}
+                    placeholder="King Abdulaziz University"
+                    autoComplete="organization"
+                  />
+                  <Input
+                    label="Graduation year"
+                    type="number"
+                    value={form.graduationYear}
+                    onChange={update('graduationYear')}
+                    placeholder="2024"
+                    min={2000}
+                    max={new Date().getFullYear() + 2}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Terms checkbox */}
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.agreeTerms}
+                onChange={update('agreeTerms')}
+                required
+                className="mt-0.5 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"
+              />
+              <span className="text-sm text-slate-600 leading-relaxed">
+                I agree to the{' '}
+                <span className="text-blue-600 hover:underline cursor-pointer">Terms of Service</span>{' '}
+                and{' '}
+                <span className="text-blue-600 hover:underline cursor-pointer">Privacy Policy</span>
+              </span>
+            </label>
+
             <Button type="submit" fullWidth size="lg" loading={loading} className="mt-2">
               Create account
             </Button>
@@ -138,7 +243,7 @@ export function Signup() {
         </div>
 
         <p className="text-center text-xs text-slate-400 mt-6 leading-relaxed">
-          By creating an account you agree to our Terms of Service and Privacy Policy.
+          {APP_CONFIG.name} is an independent study tool. Not affiliated with or endorsed by the SCHS.
         </p>
       </div>
     </div>

@@ -91,6 +91,16 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
     return <Forbidden />;
   }
 
+  // Redirect students who haven't completed onboarding (unless they're already there)
+  if (
+    !requiredRoles &&
+    profile?.role === 'student' &&
+    profile.onboarding_completed === false &&
+    location.pathname !== ROUTES.onboarding
+  ) {
+    return <Navigate to={ROUTES.onboarding} replace />;
+  }
+
   return <>{children}</>;
 }
 
@@ -110,11 +120,14 @@ export function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
   if (!isConfigured || isLoading) return null;
 
   if (isAuthenticated) {
-    const dest =
-      profile?.role === 'admin' || profile?.role === 'main_admin'
-        ? ROUTES.adminDashboard
-        : ROUTES.studentDashboard;
-    return <Navigate to={dest} replace />;
+    if (profile?.role === 'admin' || profile?.role === 'main_admin') {
+      return <Navigate to={ROUTES.adminDashboard} replace />;
+    }
+    // Students who haven't completed onboarding → send to onboarding
+    if (profile?.role === 'student' && profile.onboarding_completed === false) {
+      return <Navigate to={ROUTES.onboarding} replace />;
+    }
+    return <Navigate to={ROUTES.studentDashboard} replace />;
   }
 
   return <>{children}</>;
