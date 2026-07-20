@@ -97,27 +97,59 @@ export function AdminSettings() {
             <Row label="RLS"            value="Enabled on all tables" />
           </Section>
 
-          {/* Pending items */}
+          {/* Required setup steps */}
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
-            <p className="text-sm font-semibold text-amber-800 mb-3">Pending setup</p>
-            <ul className="space-y-2">
+            <p className="text-sm font-semibold text-amber-800 mb-3">Required production setup</p>
+            <ul className="space-y-3">
               {[
-                { label: 'Run migrations', detail: '011_notifications.sql in Supabase SQL Editor' },
-                { label: 'Deploy Edge Function', detail: 'supabase functions deploy ai-tutor --project-ref bzyamwzrzpabsmrfbapv' },
-                { label: 'Set Anthropic secret', detail: 'supabase secrets set ANTHROPIC_API_KEY=… --project-ref bzyamwzrzpabsmrfbapv' },
-                { label: 'Error reports table', detail: 'DB table + RLS for student-submitted content flags' },
-                { label: 'Audit logs table', detail: 'audit_events table with server-side writes via Edge Function' },
+                {
+                  label: 'Run all migrations (001 → 014)',
+                  detail: 'Open each supabase/migrations/*.sql file in Supabase SQL Editor and run in order.',
+                  critical: true,
+                },
+                {
+                  label: 'Deploy AI Tutor edge function',
+                  detail: 'supabase functions deploy ai-tutor --project-ref bzyamwzrzpabsmrfbapv',
+                  critical: true,
+                },
+                {
+                  label: 'Set ANTHROPIC_API_KEY secret (CRITICAL — AI will not work without this)',
+                  detail: 'supabase secrets set ANTHROPIC_API_KEY=sk-ant-… --project-ref bzyamwzrzpabsmrfbapv',
+                  critical: true,
+                },
+                {
+                  label: 'Enable pgvector extension',
+                  detail: 'Run: CREATE EXTENSION IF NOT EXISTS vector; in the SQL Editor (needed for migration 014).',
+                  critical: false,
+                },
+                {
+                  label: 'Process and index approved resources for AI retrieval',
+                  detail: 'Use the resource chunking pipeline to populate ai_resource_chunks with text and embeddings.',
+                  critical: false,
+                },
               ].map(item => (
                 <li key={item.label} className="flex items-start gap-2">
-                  <span className="mt-0.5 w-4 h-4 border-2 border-amber-400 rounded shrink-0" />
+                  <span className={`mt-0.5 w-4 h-4 border-2 rounded shrink-0 ${item.critical ? 'border-red-500' : 'border-amber-400'}`} />
                   <div>
-                    <span className="text-sm font-medium text-amber-900">{item.label}</span>
-                    <p className="text-xs text-amber-700 mt-0.5 font-mono">{item.detail}</p>
+                    <span className={`text-sm font-medium ${item.critical ? 'text-red-800' : 'text-amber-900'}`}>
+                      {item.label}
+                    </span>
+                    <p className="text-xs text-amber-700 mt-0.5 font-mono break-all">{item.detail}</p>
                   </div>
                 </li>
               ))}
             </ul>
           </div>
+
+          {/* AI Tutor status */}
+          <Section title="AI Tutor">
+            <Row label="Edge function"      value="ai-tutor" mono />
+            <Row label="Model"              value="claude-haiku-4-5-20251001" mono />
+            <Row label="Daily limit/user"   value="50 requests" />
+            <Row label="Max message length" value="4 000 characters" />
+            <Row label="Retrieval"          value="Full-text search (vector search when embeddings ready)" />
+            <Row label="ANTHROPIC_API_KEY"  value="Set via: supabase secrets set ANTHROPIC_API_KEY=…" mono />
+          </Section>
 
         </div>
       </PageContainer>
